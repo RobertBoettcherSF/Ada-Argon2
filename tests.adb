@@ -16,9 +16,9 @@ procedure Tests is
       end if;
    end Check;
 
-   Pwd1  : constant Byte_Array := (16#70#, 16#61#, 16#73#, 16#73#, 16#77#, 16#6F#, 16#72#, 16#64#); -- "password"
-   Salt1 : constant Byte_Array := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-   Pwd2  : constant Byte_Array := (16#73#, 16#65#, 16#63#, 16#72#, 16#65#, 16#74#); -- "secret"
+   Pwd1  : constant Byte_Array := [16#70#, 16#61#, 16#73#, 16#73#, 16#77#, 16#6F#, 16#72#, 16#64#]; -- "password"
+   Salt1 : constant Byte_Array := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+   Pwd2  : constant Byte_Array := [16#73#, 16#65#, 16#63#, 16#72#, 16#65#, 16#74#]; -- "secret"
 begin
    Put_Line ("=== Starting Argon2 Test Suite (ISO/IEC 8652:2023 / RFC 9106) ===");
 
@@ -78,7 +78,7 @@ begin
    -- TEST 6 — Salt Variations
    Put_Line ("TEST 6 — Salt Variations");
    declare
-      Salt2  : constant Byte_Array := (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+      Salt2  : constant Byte_Array := [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
       Res_S1 : constant Byte_Array := Hash_Argon2id (Pwd1, Salt1, Tag_Length => 32);
       Res_S2 : constant Byte_Array := Hash_Argon2id (Pwd1, Salt2, Tag_Length => 32);
    begin
@@ -138,14 +138,14 @@ begin
       Ok  : constant Boolean := Verify (Argon2id, Pwd2, Salt1, Exp);
    begin
       Check ("11.1 Verify returns false for wrong password", not Ok);
-      Check ("11.2 Verify returns false for modified salt", not Verify (Argon2id, Pwd1, (16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1), Exp));
-      Check ("11.3 Verify returns false for mismatching hash length", not Verify (Argon2id, Pwd1, Salt1, (1, 2, 3)));
+      Check ("11.2 Verify returns false for modified salt", not Verify (Argon2id, Pwd1, [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1], Exp));
+      Check ("11.3 Verify returns false for mismatching hash length", not Verify (Argon2id, Pwd1, Salt1, [1, 2, 3]));
    end;
 
    -- TEST 12 — Exception Handling: Empty Password
    Put_Line ("TEST 12 — Exception Handling: Empty Password");
    declare
-      Empty_Pwd : constant Byte_Array (1 .. 0) := (others => 0);
+      Empty_Pwd : constant Byte_Array (1 .. 0) := [];
       Ex_Raised : Boolean := False;
    begin
       begin
@@ -166,7 +166,7 @@ begin
    -- TEST 13 — Exception Handling: Insufficient Salt Length
    Put_Line ("TEST 13 — Exception Handling: Insufficient Salt Length");
    declare
-      Short_Salt : constant Byte_Array := (1, 2, 3, 4);
+      Short_Salt : constant Byte_Array := [1, 2, 3, 4];
       Ex_Raised  : Boolean := False;
    begin
       begin
@@ -191,7 +191,9 @@ begin
    begin
       begin
          declare
-            Dummy : constant Byte_Array := Hash_Argon2id (Pwd1, Salt1, Memory_Cost => 4, Parallel => 4);
+            -- We use Memory_Cost => 16 to be within the valid range of the type, 
+            -- but 16 < 8 * 4, forcing the Invalid_Parameter logic to trigger.
+            Dummy : constant Byte_Array := Hash_Argon2id (Pwd1, Salt1, Memory_Cost => 16, Parallel => 4);
          begin
             pragma Unreferenced (Dummy);
          end;
