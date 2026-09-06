@@ -32,7 +32,7 @@ package Argon2 is
       Time_Cost   : Iterations_Count := 3;
       Parallel    : Parallelism_Count := 4;
       Tag_Length  : Tag_Length_Bytes := 32) return Byte_Array
-     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= 8 * Memory_Size_Kib (Parallel),
+     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= Memory_Size_Kib (8 * Natural (Parallel)),
           Post => Hash_Argon2d'Result'Length = Integer (Tag_Length);
 
    -- Computes Argon2i hash (data-independent addressing)
@@ -43,7 +43,7 @@ package Argon2 is
       Time_Cost   : Iterations_Count := 3;
       Parallel    : Parallelism_Count := 4;
       Tag_Length  : Tag_Length_Bytes := 32) return Byte_Array
-     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= 8 * Memory_Size_Kib (Parallel),
+     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= Memory_Size_Kib (8 * Natural (Parallel)),
           Post => Hash_Argon2i'Result'Length = Integer (Tag_Length);
 
    -- Computes Argon2id hash (hybrid data-independent / data-dependent addressing)
@@ -54,7 +54,7 @@ package Argon2 is
       Time_Cost   : Iterations_Count := 3;
       Parallel    : Parallelism_Count := 4;
       Tag_Length  : Tag_Length_Bytes := 32) return Byte_Array
-     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= 8 * Memory_Size_Kib (Parallel),
+     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= Memory_Size_Kib (8 * Natural (Parallel)),
           Post => Hash_Argon2id'Result'Length = Integer (Tag_Length);
 
    -- Generic entry point dispatching by Variant_Type
@@ -66,7 +66,7 @@ package Argon2 is
       Time_Cost   : Iterations_Count := 3;
       Parallel    : Parallelism_Count := 4;
       Tag_Length  : Tag_Length_Bytes := 32) return Byte_Array
-     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= 8 * Memory_Size_Kib (Parallel),
+     with Pre  => Password'Length > 0 and then Salt'Length >= 8 and then Memory_Cost >= Memory_Size_Kib (8 * Natural (Parallel)),
           Post => Hash'Result'Length = Integer (Tag_Length);
 
    -- Verifies a password against expected hash output for a given variant and parameters
