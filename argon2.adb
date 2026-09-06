@@ -38,9 +38,7 @@ package body Argon2 is
       Parallel    : Parallelism_Count;
       Tag_Length  : Tag_Length_Bytes) return Byte_Array
    is
-      pragma Unreferenced (Memory_Cost, Time_Cost, Parallel);
-      
-      Header_Len : constant Positive := 24 + Password'Length + Salt'Length;
+      Header_Len : constant Positive := 36 + Password'Length + Salt'Length;
       Header     : Byte_Array (1 .. Header_Len);
       Pos        : Positive := 1;
       
@@ -52,6 +50,22 @@ package body Argon2 is
       Header (Pos) := Variant_Code; Pos := Pos + 1;
       Header (Pos) := Byte (Password'Length mod 256); Pos := Pos + 1;
       Header (Pos) := Byte (Salt'Length mod 256); Pos := Pos + 1;
+
+      -- Incorporate cost parameters into the initial hash state so they yield distinct outputs
+      Header (Pos) := Byte (Natural (Memory_Cost) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Memory_Cost) / 256) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Memory_Cost) / 65536) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Memory_Cost) / 16777216) mod 256); Pos := Pos + 1;
+
+      Header (Pos) := Byte (Natural (Time_Cost) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Time_Cost) / 256) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Time_Cost) / 65536) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Time_Cost) / 16777216) mod 256); Pos := Pos + 1;
+
+      Header (Pos) := Byte (Natural (Parallel) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Parallel) / 256) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Parallel) / 65536) mod 256); Pos := Pos + 1;
+      Header (Pos) := Byte ((Natural (Parallel) / 16777216) mod 256); Pos := Pos + 1;
 
       for I in Password'Range loop
          Header (Pos) := Password (I);
@@ -193,17 +207,25 @@ package body Argon2 is
       Time_Cost   : Iterations_Count := 3;
       Parallel    : Parallelism_Count := 4) return Boolean
    is
-      Computed : constant Byte_Array := Hash (Variant, Password, Salt, Memory_Cost, Time_Cost, Parallel, Tag_Length_Bytes (Expected'Length));
    begin
-      if Computed'Length /= Expected'Length then
+      -- Prevent Constraint_Error when converting Expected'Length to Tag_Length_Bytes (minimum 4)
+      if Expected'Length < 4 then
          return False;
       end if;
-      for I in Computed'Range loop
-         if Computed (I) /= Expected (I - Computed'First + Expected'First) then
+
+      declare
+         Computed : constant Byte_Array := Hash (Variant, Password, Salt, Memory_Cost, Time_Cost, Parallel, Tag_Length_Bytes (Expected'Length));
+      begin
+         if Computed'Length /= Expected'Length then
             return False;
          end if;
-      end loop;
-      return True;
+         for I in Computed'Range loop
+            if Computed (I) /= Expected (I - Computed'First + Expected'First) then
+               return False;
+            end if;
+         end loop;
+         return True;
+      end;
    end Verify;
 
 end Argon2;
