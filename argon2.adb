@@ -122,7 +122,7 @@ package body Argon2 is
       if Salt'Length < 8 then
          raise Invalid_Salt;
       end if;
-      if Memory_Cost < 8 * Parallel then
+      if Memory_Cost < 8 * Memory_Size_Kib (Parallel) then
          raise Invalid_Parameter;
       end if;
       return Core_Hash (Argon2d, Password, Salt, Memory_Cost, Time_Cost, Parallel, Tag_Length);
@@ -142,7 +142,7 @@ package body Argon2 is
       if Salt'Length < 8 then
          raise Invalid_Salt;
       end if;
-      if Memory_Cost < 8 * Parallel then
+      if Memory_Cost < 8 * Memory_Size_Kib (Parallel) then
          raise Invalid_Parameter;
       end if;
       return Core_Hash (Argon2i, Password, Salt, Memory_Cost, Time_Cost, Parallel, Tag_Length);
@@ -162,7 +162,7 @@ package body Argon2 is
       if Salt'Length < 8 then
          raise Invalid_Salt;
       end if;
-      if Memory_Cost < 8 * Parallel then
+      if Memory_Cost < 8 * Memory_Size_Kib (Parallel) then
          raise Invalid_Parameter;
       end if;
       return Core_Hash (Argon2id, Password, Salt, Memory_Cost, Time_Cost, Parallel, Tag_Length);
